@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QRコードスキャン</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+  <h2>QRスキャン</h2>
+  <div id="reader" style="width: 300px;"></div>
+  <ul id="qr-list"></ul>
+  <button onclick="submitData()">一括送信</button>
+
+  <script>
+    const qrCodes = [];
+
+    function onScanSuccess(decodedText) {
+      if (!qrCodes.includes(decodedText)) {
+        qrCodes.push(decodedText);
+        document.getElementById("qr-list").innerHTML += `<li>${decodedText}</li>`;
+      }
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
+
+    function submitData() {
+      const payload = {
+        qrList: qrCodes.map(code => ({
+          qrCode: code,
+          staffId: "12345", // 固定 or 入力欄を用意してもOK
+          businessTripNo: "BT-20250617"
+        }))
+      };
+
+      fetch("https://script.google.com/a/macros/kinrei.co.jp/s/AKfycbzBq2m-N7oBmPW93xFCRQj7fEUSbRt14eO4fkv50VOY8J0f7HCxi5MRFXQ4o9NXCv7z/exec", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(() => alert("送信完了！"))
+      .catch(() => alert("送信失敗"));
+    }
+  </script>
+</body>
+</html>
